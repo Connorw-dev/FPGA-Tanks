@@ -1,0 +1,31 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_misc.all;
+use work.declarations.all;
+
+entity ModeFSM is
+	port(clk, rst, end_game : in std_logic;
+	     key : in std_logic_vector(9 downto 0);
+	     mode : out std_logic_vector(1 downto 0));
+end ModeFSM;
+
+architecture impl of ModeFSM is
+	signal cur_state, nxt_state, nxt_state1 : std_logic_vector(MODE_STATE_WIDTH-1 downto 0);
+begin
+	-- State register
+	MODE_STATE : vDFF generic map(MODE_STATE_WIDTH) port map(clk, nxt_state, cur_state);
+	-- Next state logic
+	process (all) begin
+		case cur_state is
+			when MAIN_MENU => mode <= 2d"0";
+				if key(4) then nxt_state1 <= GAME_STATE; else nxt_state1 <= MAIN_MENU; end if;
+			when GAME_STATE => mode <= 2d"1";
+				if end_game then nxt_state1 <= GAME_OVER_SCREEN; else nxt_state1 <= GAME_STATE; end if;
+			when GAME_OVER_SCREEN => mode <= 2d"2";
+				if or_reduce(key) then nxt_state1 <= MAIN_MENU; else nxt_state1 <= GAME_OVER_SCREEN; end if;
+			when others => mode <= 2d"0";
+		end case;
+	end process;
+	nxt_state <= MAIN_MENU when rst else nxt_state1;
+end impl;

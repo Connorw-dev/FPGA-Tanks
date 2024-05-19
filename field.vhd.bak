@@ -1,0 +1,59 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
+
+ENTITY field IS
+    PORT (
+        clk, rstn, en : IN STD_LOGIC; -- RID EN, swap to RST
+        xscan, yscan : IN INTEGER;
+        right_limit, left_limit, top_limit, bottom_limit : BUFFER INTEGER; -- RID these
+        flag : OUT STD_LOGIC
+    );
+END field;
+
+ARCHITECTURE behavior OF field IS
+    CONSTANT y_max : INTEGER := 480;
+    CONSTANT x_max : INTEGER := 640;
+BEGIN
+    -- Field is drawn by setting the flag based on specific coordinates
+    draw_field : PROCESS (clk, rstn)
+    BEGIN
+        IF rstn = '0' THEN
+            flag <= '0';
+        ELSIF rising_edge(clk) THEN
+            -- Default is not a wall
+            flag <= '0';
+
+            -- Left border wall
+            IF (xscan >= 0 AND xscan <= 30 AND yscan >= 0 AND yscan <= y_max) THEN
+                flag <= '1';
+            -- Top border wall
+            ELSIF (xscan >= 0 AND xscan <= x_max AND yscan >= 0 AND yscan <= 30) THEN
+                flag <= '1';
+            -- Right border wall
+            ELSIF (xscan >= x_max-30 AND xscan <= x_max AND yscan >= 0 AND yscan <= y_max) THEN
+                flag <= '1';
+            -- Bottom border wall
+            ELSIF (xscan >= 0 AND xscan <= x_max AND yscan >= y_max-30 AND yscan <= y_max) THEN
+                flag <= '1';
+            -- Define the first rectangle
+            ELSIF (xscan > 150 AND xscan < 200 AND yscan <= y_max / 3 AND yscan >0) THEN
+                flag <= '1';
+            -- Define the second rectangle
+            ELSIF (xscan > 150 AND xscan < 200 AND yscan >= y_max * 2 / 3 AND yscan <= y_max) THEN
+                flag <= '1';
+            -- Define the third rectangle
+            ELSIF (xscan > 300 AND xscan < 350 AND yscan > 160 AND yscan < 320) THEN
+                flag <= '1';
+            END IF;
+        END IF;
+    END PROCESS;
+	 
+	 -- RID BELOW
+    -- Set the limits for the field (you can adjust these if necessary)
+    right_limit <= x_max;
+    left_limit <= 0;
+    top_limit <= 0;
+    bottom_limit <= y_max;
+
+END behavior;
