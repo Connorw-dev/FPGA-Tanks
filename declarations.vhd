@@ -84,11 +84,13 @@ package declarations IS
 			clk, rst : IN STD_LOGIC;
 			pixel_on, pixel_on_menu : IN STD_LOGIC;
 			pixel_on_tank1, pixel_on_tank2 : IN STD_LOGIC;
+			pixel_on_cpu_tank1 : IN STD_LOGIC;
+			pixel_on_bullet : IN STD_LOGIC;
 			red, blue, green : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
 		);
 	END COMPONENT;
 	
-	-- COMPONENT fOR Field
+	-- COMPONENT FOR Field
 	COMPONENT field IS
 		PORT (
 			clk, rstn : IN STD_LOGIC;
@@ -97,18 +99,61 @@ package declarations IS
 		);
 	END COMPONENT;
 	
-	-- COMPONENT 
+	-- COMPONENT FOR Tank
 	COMPONENT tank IS
 		PORT (
         clk, rstn : IN STD_LOGIC;
 		  xscan, yscan : IN INTEGER;
 		  x_pixel_ref, y_pixel_ref : BUFFER INTEGER;
         x_start, y_start : IN INTEGER;
-        SW_LEFT, SW_RIGHT : IN STD_LOGIC;
+        SW_LEFT, SW_RIGHT, SW_FORWARD : IN STD_LOGIC;
         mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
         flag : OUT STD_LOGIC;
 		  dir_OUT : OUT INTEGER
 		 );
+	END COMPONENT;
+	-- Tank Dimensions
+	CONSTANT x_dim : INTEGER := 30;
+   CONSTANT y_dim : INTEGER := 30;
+	
+	-- COMPONENT FOR Bullet
+	COMPONENT bullet IS
+		PORT(
+			clk, rstn : IN STD_LOGIC;
+			mode : IN STD_LOGIC_VECTOR(1 downto 0);
+			x_pos_start, y_pos_start : IN INTEGER;
+			x_pos_out, y_pos_out : OUT INTEGER;
+			direction : IN INTEGER RANGE 0 TO 7;
+			is_active : INOUT STD_LOGIC;
+			xscan, yscan : IN INTEGER;
+			flag : OUT STD_LOGIC
+		);
+	END COMPONENT;
+	
+	-- COMPONENT FOR CPU Controller
+	COMPONENT cpu_controller IS
+		PORT(
+			clk, rstn : IN STD_LOGIC;
+			x_pixel_ref, y_pixel_ref : IN INTEGER;
+			player1_x_pixel_ref, player1_y_pixel_ref, player2_x_pixel_ref, player2_y_pixel_ref : IN INTEGER;
+			cpu_dir : IN INTEGER;
+			SW_LEFT, SW_RIGHT, SW_FORWARD : OUT STD_LOGIC;
+			shoot : OUT STD_LOGIC
+		);
+	END COMPONENT;
+	-- CONSTANT FOR CPU Controller
+	CONSTANT distance_threshold : INTEGER := 20;
+	
+	-- COMPONENT FOR CPU Tank
+	COMPONENT cpu_tank IS
+		PORT(
+			clk, rstn : IN STD_LOGIC;
+			xscan, yscan : IN INTEGER;
+			player1_x_pixel_ref, player1_y_pixel_ref, player2_x_pixel_ref, player2_y_pixel_ref : IN INTEGER;
+			x_start, y_start : IN INTEGER;
+			mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+			flag : OUT STD_LOGIC
+		);
 	END COMPONENT;
 	
 END package;
