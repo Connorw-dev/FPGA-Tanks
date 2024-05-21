@@ -10,7 +10,8 @@ ENTITY bullet IS
 		  x_pos_start, y_pos_start : in integer;
         x_pos_out, y_pos_out : out integer;
         direction : in integer range 0 to 7;
-        is_active : inout std_logic;
+		  want_active : in std_logic;
+        is_active : out std_logic;
 		  xscan, yscan : IN INTEGER;
         flag : OUT STD_LOGIC
     );
@@ -46,9 +47,16 @@ ARCHITECTURE behavior OF bullet IS
 	
 	signal x_pos : integer := 400;
 	signal y_pos : integer := 200;
+	
+	signal active_now : std_logic := '0';
+	signal want_delete : std_logic := '0';
 	BEGIN
 	
+	
+	
 	------------------- Variable updates ---------------
+	
+	is_active <= active_now;
 	
 	-- Calculate sides for drawing
 	x_pos_out <= x_pos;
@@ -99,10 +107,25 @@ ARCHITECTURE behavior OF bullet IS
 	
 	------------------ Processes -----------------------
 	
+	become_active : process (clk, rstn)
+begin
+    if rstn = '0' then
+        active_now <= '0';
+    elsif rising_edge(clk) then
+        if (want_active = '1') then
+            active_now <= '1';
+        
+		  elsif (want_delete = '1') then
+		      active_now <= '0';
+				
+		 end if;
+    end if;
+end process;
+	
 	-- Draw bullet
 	draw : PROCESS (clk, rstn)
 	BEGIN
-		IF (rstn = '0' or not mode = "01" or is_active = '0') THEN
+		IF (rstn = '0' or not mode = "01" or active_now = '0') THEN
 			flag <= '0';
 		ELSIF rising_edge(clk) THEN
 			if (mode = GAME_STATE) THEN
@@ -131,7 +154,7 @@ ARCHITECTURE behavior OF bullet IS
 	-- Calculate next position
 	movement_calculation : PROCESS (clk, rstn)
     BEGIN
-        IF (rstn = '0' or not mode = "01" or is_active = '0') THEN
+        IF (rstn = '0' or not mode = "01" or active_now = '0') THEN
 				-- Initial position
 				x_pos_next <= x_pos;
             y_pos_next <= y_pos;
@@ -179,7 +202,7 @@ ARCHITECTURE behavior OF bullet IS
 	-- Collision check before movement update.
 	 position_update : PROCESS (clk, rstn)
 		BEGIN
-			 IF (rstn = '0' or not mode = "01" or is_active = '0') THEN
+			 IF (rstn = '0' or not mode = "01" or active_now = '0') THEN
 				  x_pos <= x_pos_start;
 				  y_pos <= y_pos_start;
 				  x_pos_temp <= x_pos;
@@ -193,11 +216,13 @@ ARCHITECTURE behavior OF bullet IS
 				  IF (is_top_left_wall = '0') AND (is_top_right_wall = '0') AND (is_bottom_left_wall = '0') AND (is_bottom_right_wall = '0') THEN
 						 x_pos <= x_pos_temp;
 						 y_pos <= y_pos_temp;
+						 want_delete <= '0';
 					ELSE
 					    -- DELETE THIS
-					    x_pos <= x_pos_start;
-						 y_pos <= y_pos_start;
-					    --is_active <= '0';
+					    --x_pos <= x_pos_start;
+						 --y_pos <= y_pos_start;
+						 
+					    want_delete <= '1';
 					END IF;
 			 END IF;
 		END PROCESS;

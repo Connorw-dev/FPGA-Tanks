@@ -9,18 +9,21 @@ ENTITY tank IS
 		  xscan, yscan : IN INTEGER;
         x_pixel_ref, y_pixel_ref : BUFFER INTEGER;
         x_start, y_start : IN INTEGER;
-        SW_LEFT, SW_RIGHT, SW_FORWARD : IN STD_LOGIC;
+        SW_LEFT, SW_RIGHT, SW_FORWARD, SW_SHOOT : IN STD_LOGIC;
         mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
-
+			
         flag : OUT STD_LOGIC;
-		  dir_out : OUT INTEGER
+		  dir_out : OUT INTEGER;
+		  bullet1_x, bullet1_y : OUT INTEGER;
+		  bullet2_x, bullet2_y : OUT INTEGER;
+		  bullet3_x, bullet3_y : OUT INTEGER
     );
 END tank;
 
 ARCHITECTURE behavior OF tank IS
 
---    CONSTANT x_dim : INTEGER := 30;
---    CONSTANT y_dim : INTEGER := 30;
+    CONSTANT x_dim : INTEGER := 30;
+    CONSTANT y_dim : INTEGER := 30;
     CONSTANT y_min : INTEGER := 0;
     CONSTANT y_MAX : INTEGER := 480;
 
@@ -42,6 +45,7 @@ ARCHITECTURE behavior OF tank IS
 	 
 	 signal can_move : std_logic := '1';
 	 signal SW_LEFT_last, SW_RIGHT_last : std_logic := '0';
+	 signal SW_SHOOT_last : std_logic := '0';
 	 
 	 -- Corner coordinates for collision checking
 		signal top_left_x, top_left_y : integer;
@@ -50,6 +54,12 @@ ARCHITECTURE behavior OF tank IS
 		signal bottom_right_x, bottom_right_y : integer;
 
 		signal is_top_left_wall, is_top_right_wall, is_bottom_left_wall, is_bottom_right_wall : std_logic;
+		
+		signal bullet1_flag : std_logic := '0';
+		signal bullet1_active : std_logic := '0';
+		signal bullet1_want : std_logic := '0';
+		signal bullet_start_x, bullet_start_y : integer := 0;
+		signal bullet_dir : integer := 0;
 
 BEGIN
     -- Values necessary to draw the racket
@@ -74,6 +84,39 @@ BEGIN
 	bottom_left_y <= y_pixel_ref_next + y_dim;
 	bottom_right_x <= x_pixel_ref_next + x_dim;
 	bottom_right_y <= y_pixel_ref_next + y_dim;
+	
+	process (dir)
+	begin
+	  case dir is
+        when 0 =>
+            bullet_start_x <= x_mid - nozzle_size / 2;
+            bullet_start_y <= y_mid - 16 - nozzle_size;
+        when 1 =>
+            bullet_start_x <= x_mid + 16;
+            bullet_start_y <= y_mid - nozzle_size - 16;
+        when 2 =>
+            bullet_start_x <= x_mid + 16;
+            bullet_start_y <= y_mid - nozzle_size / 2;
+        when 3 =>
+            bullet_start_x <= x_mid + 16;
+            bullet_start_y <= y_mid + 16;
+        when 4 =>
+            bullet_start_x <= x_mid - nozzle_size / 2;
+            bullet_start_y <= y_mid + 16;
+        when 5 =>
+            bullet_start_x <= x_mid - 16 - nozzle_size;
+            bullet_start_y <= y_mid + 16;
+        when 6 =>
+            bullet_start_x <= x_mid - 16 - nozzle_size;
+            bullet_start_y <= y_mid - nozzle_size / 2;
+        when 7 =>
+            bullet_start_x <= x_mid - 16 - nozzle_size;
+            bullet_start_y <= y_mid - nozzle_size - 16;
+        when others =>
+            bullet_start_x <= x_mid - nozzle_size / 2;
+            bullet_start_y <= y_mid - 16 - nozzle_size;
+    end case;
+end process;
 	 
 	 
 
@@ -109,6 +152,10 @@ BEGIN
 						  
 					 elsif (dir = 4 AND (xscan >= x_mid - nozzle_size/2) AND (xscan <= x_mid + nozzle_size/2) AND (yscan >= y_mid + 15) AND (yscan <= y_mid + 15 + nozzle_size)) then
 						  flag <= '1';
+					
+					 -- BULLETS
+					 elsif (bullet1_flag = '1') THEN
+					     flag <= '1';
 						
 						else
 							flag <= '0';
@@ -154,6 +201,23 @@ END PROCESS;
 			 clk => clk, rstn => rstn,
 			 xscan => bottom_right_x, yscan => bottom_right_y,
 			 flag => is_bottom_right_wall
+		);
+		
+		-- BULLET ADD
+		bullet1 : bullet port map(	  
+			  clk => clk,
+			  rstn => rstn,
+			  xscan => xscan,
+			  yscan => yscan,
+			  x_pos_start=> bullet_start_x,
+			  y_pos_start => bullet_start_y,
+			  x_pos_out=> bullet1_x,
+			  y_pos_out => bullet1_y,
+			  direction => bullet_dir,
+			  want_active => bullet1_want,
+			  is_active => bullet1_active,
+			  mode => mode,
+			  flag => bullet1_flag
 		);
 
     tank_movement_calculation : PROCESS (clk, rstn)
@@ -257,5 +321,37 @@ END PROCESS;
 			 END IF;
 		END PROCESS;
 		
+		
 		-- SHOOT
+		SHOOT : PROCESS (clk, rstn)
+		begin
+			if (rstn = '0' or not mode = "01") then
+            SW_SHOOT_last <= '0';
+        elsif rising_edge(clk) then
+		     if (cnt mod 100000 = 0) then
+            -- Update the last states at each clock cycle
+            SW_SHOOT_last <= SW_SHOOT;
+				if SW_SHOOT_last = '0' and SW_SHOOT = '1' THEN
+				  if (bullet1_active = '0') THEN
+				      bullet_dir <= dir;
+						bullet1_want <= '1';
+				   else
+					   bullet1_want <= '0';
+				  end if;
+				  -- Check if bullet 1 is inactive
+				  -- set position of bullet to nozzle pos and make bullet active
+				 -- update bullet output 
+				  
+				  -- else if bullet 2 is active
+				  
+				  -- else if bullet 3 is active
+				  else
+				    bullet1_want <= '0';
+				end if;
+				
+				  
+			 end if;
+			end if;
+	end process;
+			
 END behavior;

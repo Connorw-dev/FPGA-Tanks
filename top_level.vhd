@@ -32,11 +32,21 @@ ARCHITECTURE impl OF top_level IS
 	-- Tank stuff
 	SIGNAL tank1_dir, tank2_dir : INTEGER := 0;
 	SIGNAL hit_tank : STD_LOGIC := '0';
-	-- Bullet stuff
-	SIGNAL bullet_x : INTEGER := 400;
-	SIGNAL bullet_y : INTEGER := 200;
-	SIGNAL bullet_dir : INTEGER := 2;
-	SIGNAL bullet_active : STD_LOGIC := '1';
+
+  signal tank1_bullet1_x : integer := 0;
+  signal tank1_bullet1_y : integer := 0;
+  signal tank1_bullet2_x : integer := 0;
+  signal tank1_bullet2_y : integer := 0;
+  signal tank1_bullet3_x : integer := 0;
+  signal tank1_bullet3_y : integer := 0;
+	
+  signal tank2_bullet1_x : integer := 0;
+  signal tank2_bullet1_y : integer := 0;
+  signal tank2_bullet2_x : integer := 0;
+  signal tank2_bullet2_y : integer := 0;
+  signal tank2_bullet3_x : integer := 0;
+  signal tank2_bullet3_y : integer := 0;
+
 BEGIN
 	END_game <= hit_tank;
 	LEDR <= SW;  -- debug
@@ -100,7 +110,7 @@ BEGIN
 		flag => pixel_on_game_s
 	);
 	
-	tank1 : tank PORT MAP(
+	tank1 : tank port map(
 		  clk => clock25,
 		  rstn => rst,
 		  xscan => hpos,
@@ -112,12 +122,19 @@ BEGIN
 		  SW_LEFT => not GPIO_1(13),
 		  SW_RIGHT => not GPIO_1(17),
 		  SW_FORWARD => not GPIO_1(15),
+		  SW_SHOOT => not GPIO_1(11),
 		  mode => mode,
 		  flag => pixel_on_tank1_s,
-		  dir_OUT => tank1_dir
+		  dir_out => tank1_dir, 
+		  bullet1_x => tank1_bullet1_x,
+		  bullet1_y => tank1_bullet1_y,
+		  bullet2_x => tank1_bullet2_x,
+		  bullet2_y => tank1_bullet2_y,
+		  bullet3_x => tank1_bullet3_x,
+		  bullet3_y => tank1_bullet3_y
    );
 	
-	tank2 : tank PORT MAP(
+	tank2 : tank port map(
 		  clk => clock25,
 		  rstn => rst,
 		  xscan => hpos,
@@ -125,29 +142,23 @@ BEGIN
 		  x_pixel_ref => tank2_x,
 		  y_pixel_ref => tank2_y,
 		  x_start => 80,
-		  y_start => 80,
-		  SW_LEFT => not GPIO_1(7),
-		  SW_RIGHT => not GPIO_1(3),
+		  y_start => 400,
+		  SW_LEFT => not GPIO_1(3),
+		  SW_RIGHT => not GPIO_1(7),
 		  SW_FORWARD => not GPIO_1(5),
+		  SW_SHOOT => not GPIO_1(1),
 		  mode => mode,
 		  flag => pixel_on_tank2_s,
-		  dir_OUT => tank2_dir
+		  dir_out => tank2_dir,
+		  bullet1_x => tank2_bullet1_x,
+		  bullet1_y => tank2_bullet1_y,
+		  bullet2_x => tank2_bullet2_x,
+		  bullet2_y => tank2_bullet2_y,
+		  bullet3_x => tank2_bullet3_x,
+		  bullet3_y => tank2_bullet3_y
    );
+
 	
-	bullet1 : bullet port map(
-		clk => clock25,
-		rstn => rst,
-		xscan => hpos,
-		yscan => vpos,
-		x_pos_start => 400,
-		y_pos_start => 200,
-		x_pos_out => bullet_x,
-		y_pos_out => bullet_y,
-		direction => 3,
-		is_active => '1',
-		mode => mode,
-		flag => pixel_on_bullet_s
-	);
 	
 	cpu_tank1 : cpu_tank PORT MAP(
 		clk => clock25,
@@ -180,13 +191,18 @@ BEGIN
 			pixel_on_bullet <= '0';
 		END IF;
 	END PROCESS;
+
 	
-	-- Check if bullet hits tank 1
+	-- Check if bullet hits tanks
 	process(clock25) begin
-	    if (bullet_x >= tank1_x and bullet_x <= tank1_x+30 and bullet_y >= tank1_y and bullet_y <= tank1_y+30) OR (bullet_x >= tank2_x and bullet_x <= tank2_x+30 and bullet_y >= tank2_y and bullet_y <= tank2_y+30) then
-			hit_tank <= '1';
-		 else
-		   hit_tank <= '0';
-		 end if;
+	    if (tank1_bullet1_x >= tank1_x and tank1_bullet1_x <= tank1_x + 30 and tank1_bullet1_y >= tank1_y and tank1_bullet1_y <= tank1_y + 30) OR
+       (tank1_bullet1_x >= tank2_x and tank1_bullet1_x <= tank2_x + 30 and tank1_bullet1_y >= tank2_y and tank1_bullet1_y <= tank2_y + 30) OR
+       (tank2_bullet1_x >= tank1_x and tank2_bullet1_x <= tank1_x + 30 and tank2_bullet1_y >= tank1_y and tank2_bullet1_y <= tank1_y + 30) OR
+       (tank2_bullet1_x >= tank2_x and tank2_bullet1_x <= tank2_x + 30 and tank2_bullet1_y >= tank2_y and tank2_bullet1_y <= tank2_y + 30) then
+        hit_tank <= '1';
+    else
+        hit_tank <= '0';
+    end if;
 	end process;
+
 END impl;

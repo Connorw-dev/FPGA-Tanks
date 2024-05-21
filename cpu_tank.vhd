@@ -10,7 +10,10 @@ ENTITY cpu_tank IS
 		player1_x_pixel_ref, player1_y_pixel_ref, player2_x_pixel_ref, player2_y_pixel_ref : IN INTEGER;
 		x_start, y_start : IN INTEGER;
 		mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
-      flag : OUT STD_LOGIC
+      flag : OUT STD_LOGIC;
+	  bullet1_x, bullet1_y : OUT INTEGER;
+	  bullet2_x, bullet2_y : OUT INTEGER;
+	  bullet3_x, bullet3_y : OUT INTEGER
 	);
 END cpu_tank;
 
@@ -20,7 +23,7 @@ ARCHITECTURE impl OF cpu_tank is
 	SIGNAL SW_LEFT : STD_LOGIC := '0';
 	SIGNAL SW_RIGHT : STD_LOGIC := '0';
 	SIGNAL SW_FORWARD : STD_LOGIC := '0';
-	SIGNAL shoot : STD_LOGIC;
+	SIGNAL SW_SHOOT : STD_LOGIC;
 BEGIN
 	-- Tank Component
 	CPU_Tank : tank port map(
@@ -35,9 +38,16 @@ BEGIN
 		SW_LEFT => SW_LEFT,
 		SW_RIGHT => SW_RIGHT,
 		SW_FORWARD => SW_FORWARD,
+		SW_SHOOT => SW_SHOOT,
 		mode => mode,
 		flag => flag,
-		dir_OUT => cpu_dir
+		dir_out => cpu_dir,
+	  bullet1_x => bullet1_x,
+	  bullet1_y => bullet1_y,
+	  bullet2_x => bullet2_x,
+	  bullet2_y => bullet2_y,
+	  bullet3_x => bullet3_x,
+	  bullet3_y => bullet3_y
 	);
 	
 	-- CPU Controller Component
@@ -54,6 +64,6 @@ BEGIN
 		SW_LEFT => SW_LEFT,
 		SW_RIGHT => SW_RIGHT,
 		SW_FORWARD => SW_FORWARD,
-		shoot => shoot
+		shoot => SW_SHOOT
 	);
 END impl;

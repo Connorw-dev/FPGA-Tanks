@@ -27,6 +27,8 @@ package declarations IS
     CONSTANT vb : INTEGER := 33;
     CONSTANT vc : INTEGER := 480;
     CONSTANT vd : INTEGER := 10;
+	 
+	 constant TANK_SIZE : INTEGER := 30;
 	
 	-- States fOR ModeFSM
 	constant MODE_STATE_WIDTH: INTEGER := 2;
@@ -99,36 +101,37 @@ package declarations IS
 		);
 	END COMPONENT;
 	
-	-- COMPONENT FOR Tank
-	COMPONENT tank IS
+	-- Component 
+	component tank is
 		PORT (
         clk, rstn : IN STD_LOGIC;
 		  xscan, yscan : IN INTEGER;
 		  x_pixel_ref, y_pixel_ref : BUFFER INTEGER;
         x_start, y_start : IN INTEGER;
-        SW_LEFT, SW_RIGHT, SW_FORWARD : IN STD_LOGIC;
+        SW_LEFT, SW_RIGHT, SW_FORWARD, SW_SHOOT : IN STD_LOGIC;
         mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
         flag : OUT STD_LOGIC;
-		  dir_OUT : OUT INTEGER
+		  dir_out : OUT INTEGER;
+		  bullet1_x, bullet1_y : OUT INTEGER;
+		  bullet2_x, bullet2_y : OUT INTEGER;
+		  bullet3_x, bullet3_y : OUT INTEGER
 		 );
-	END COMPONENT;
-	-- Tank Dimensions
-	CONSTANT x_dim : INTEGER := 30;
-   CONSTANT y_dim : INTEGER := 30;
+	END component;
 	
-	-- COMPONENT FOR Bullet
-	COMPONENT bullet IS
-		PORT(
-			clk, rstn : IN STD_LOGIC;
-			mode : IN STD_LOGIC_VECTOR(1 downto 0);
-			x_pos_start, y_pos_start : IN INTEGER;
-			x_pos_out, y_pos_out : OUT INTEGER;
-			direction : IN INTEGER RANGE 0 TO 7;
-			is_active : INOUT STD_LOGIC;
-			xscan, yscan : IN INTEGER;
-			flag : OUT STD_LOGIC
-		);
-	END COMPONENT;
+	-- BULLET ADD
+	component bullet IS
+		 PORT (		  
+			  clk, rstn : in std_logic;
+			  mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+			  x_pos_start, y_pos_start : in integer;
+			  x_pos_out, y_pos_out : out integer;
+			  direction : in integer range 0 to 7;
+			  want_active : in std_logic;
+			  is_active : out std_logic;
+			  xscan, yscan : IN INTEGER;
+			  flag : OUT STD_LOGIC
+		 );
+	END component;
 	
 	-- COMPONENT FOR CPU Controller
 	COMPONENT cpu_controller IS
@@ -144,6 +147,7 @@ package declarations IS
 	-- CONSTANT FOR CPU Controller
 	CONSTANT distance_threshold : INTEGER := 20;
 	
+	
 	-- COMPONENT FOR CPU Tank
 	COMPONENT cpu_tank IS
 		PORT(
@@ -152,8 +156,11 @@ package declarations IS
 			player1_x_pixel_ref, player1_y_pixel_ref, player2_x_pixel_ref, player2_y_pixel_ref : IN INTEGER;
 			x_start, y_start : IN INTEGER;
 			mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
-			flag : OUT STD_LOGIC
-		);
+			flag : OUT STD_LOGIC;
+			bullet1_x, bullet1_y : OUT INTEGER;
+		  bullet2_x, bullet2_y : OUT INTEGER;
+		  bullet3_x, bullet3_y : OUT INTEGER
+	);
 	END COMPONENT;
 	
 END package;
