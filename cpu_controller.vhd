@@ -20,6 +20,9 @@ ARCHITECTURE impl OF cpu_controller IS
     SIGNAL dist1, dist2 : INTEGER;
     SIGNAL target_dir : INTEGER;
 	 SIGNAL P1_center_x, P1_center_y, P2_center_x, P2_center_y, CPU1_center_x, CPU1_center_y : INTEGER;
+	 SIGNAL cur_state : STD_LOGIC_VECTOR(CPU_CONTROLLER_STATE_WIDTH-1 DOWNTO 0) := IDLE;
+	 SIGNAL nxt_state, nxt_state1 : STD_LOGIC_VECTOR(CPU_CONTROLLER_STATE_WIDTH-1 DOWNTO 0);
+	 SIGNAL shoot_s : STD_LOGIC := '1';
 
     -- Function to calculate direction based on coordinates
     FUNCTION get_direction(player_x, player_y, cpu_x, cpu_y : INTEGER) RETURN INTEGER IS
@@ -58,17 +61,31 @@ ARCHITECTURE impl OF cpu_controller IS
     END get_direction;
 
 BEGIN
-    -- Shooting + Movement
-    shoot <= '0';
-	 SW_FORWARD <= '0';
+    -- Tank Center Positions
+	 P1_center_x <= player1_x_pixel_ref + TANK_SIZE / 2;
+	 P1_center_y <= player1_y_pixel_ref + TANK_SIZE / 2;
+	 P2_center_x <= player2_x_pixel_ref + TANK_SIZE / 2;
+	 P2_center_y <= player2_y_pixel_ref + TANK_SIZE / 2;
+	 CPU1_center_x <= x_pixel_ref + TANK_SIZE / 2;
+	 CPU1_center_y <= y_pixel_ref + TANK_SIZE / 2;
 	 
-	 -- Tank Center Positions
-	 P1_center_x <= player1_x_pixel_ref + x_dim / 2;
-	 P1_center_y <= player1_y_pixel_ref + y_dim / 2;
-	 P2_center_x <= player2_x_pixel_ref + x_dim / 2;
-	 P2_center_y <= player2_y_pixel_ref + y_dim / 2;
-	 CPU1_center_x <= x_pixel_ref + x_dim / 2;
-	 CPU1_center_y <= y_pixel_ref + y_dim / 2;
+	 -- Movement
+    SW_FORWARD <= '0';
+	 
+	 -- Shooting
+	SHOOTS : PROCESS(
+		clk, rstn
+	)
+	BEGIN
+		IF rising_edge(clk) THEN
+			IF rstn = '0' THEN
+				shoot_s <= '0';
+			ELSE
+				shoot_s <= NOT shoot_s;
+			END IF;
+		END IF;
+	END PROCESS;
+	shoot <= shoot_s;
  
     -- Calculate Closest Player Tank
 	CLOSEST_TANK_P : PROCESS(
@@ -108,31 +125,31 @@ BEGIN
             target_dir <= get_direction(P2_center_x, P2_center_y, CPU1_center_x, CPU1_center_y);
         END IF;
     END PROCESS;
-
-	-- Rotate CPU tank to face the closest player tank
-	ROTATE_TANK : PROCESS(
-		clk, rstn
+	
+	-- ROTATE CPU tank to face the closest player tank
+	-- State register
+	UPDATE_DIR_STATE : mDFF GENERIC MAP(CPU_CONTROLLER_STATE_WIDTH) PORT MAP(clk, rstn, nxt_state, cur_state);
+	-- Next state logic
+	NXT_DIR_STATE : PROCESS (
+		clk, rstn, cur_state, cpu_dir, target_dir
 	)
 	BEGIN
-		IF rising_edge(clk) THEN
-			IF rstn = '0' THEN
-				SW_LEFT <= '0';
-				SW_RIGHT <= '0';
-			ELSE
-				IF cpu_dir = target_dir THEN
-					SW_LEFT <= '0';
-					SW_RIGHT <= '0';
-				ELSE
-					IF (cpu_dir - target_dir) MOD 8 < 4 THEN
-						SW_LEFT <= '0';
-						SW_RIGHT <= '1';
-					ELSE
-						SW_LEFT <= '1';
-						SW_RIGHT <= '0';
-					END IF;
+		CASE cur_state IS
+			WHEN IDLE => SW_LEFT <= '0'; SW_RIGHT <= '0';
+				IF cpu_dir /= target_dir THEN nxt_state1 <= ROTATING;
+				ELSE nxt_state1 <= IDLE;
 				END IF;
-			END IF;
-		END IF;
+			WHEN ROTATING =>
+				IF cpu_dir = target_dir THEN nxt_state1 <= IDLE;
+				ELSE
+					IF (cpu_dir - target_dir) MOD 8 < 4 THEN SW_LEFT <= '0'; SW_RIGHT <= '1';
+					ELSE SW_LEFT <= '1'; SW_RIGHT <= '0';
+					END IF;
+					nxt_state1 <= ROTATING;
+				END IF;
+			WHEN OTHERS => SW_LEFT <= '0'; SW_RIGHT <= '0'; nxt_state1 <= IDLE;
+		END CASE;
 	END PROCESS;
+	nxt_state <= IDLE WHEN rstn='0' ELSE nxt_state1;
 
 END impl;

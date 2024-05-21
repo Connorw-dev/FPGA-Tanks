@@ -7,6 +7,7 @@ ENTITY cpu_tank IS
 	PORT(
 		clk, rstn : IN STD_LOGIC;
 		xscan, yscan : IN INTEGER;
+		x_pixel_ref, y_pixel_ref : BUFFER INTEGER;
 		player1_x_pixel_ref, player1_y_pixel_ref, player2_x_pixel_ref, player2_y_pixel_ref : IN INTEGER;
 		x_start, y_start : IN INTEGER;
 		mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
@@ -18,7 +19,6 @@ ENTITY cpu_tank IS
 END cpu_tank;
 
 ARCHITECTURE impl OF cpu_tank is
-	SIGNAL x_pixel_ref, y_pixel_ref : INTEGER;
 	SIGNAL cpu_dir : INTEGER;
 	SIGNAL SW_LEFT : STD_LOGIC := '0';
 	SIGNAL SW_RIGHT : STD_LOGIC := '0';

@@ -282,13 +282,6 @@ END PROCESS;
             -- Update the last states at each clock cycle
             SW_LEFT_last <= SW_LEFT;
             SW_RIGHT_last <= SW_RIGHT;
-				-- Increment dir when SW_LEFT is 0 and SW_RIGHT has risen from 0 to 1
-            --if SW_LEFT = '0' and SW_RIGHT_last = '0' and SW_RIGHT = '1' then
-            --    if dir = 7 then dir <= 0; else dir <= dir + 1; end if;
-            -- Decrement dir when SW_RIGHT is 0 and SW_LEFT has risen from 0 to 1
-            --elsif SW_RIGHT = '0' and SW_LEFT_last = '0' and SW_LEFT = '1' then
-            --    if dir = 0 then dir <= 7; else dir <= dir - 1; end if;
-            --end if;
 				if SW_LEFT = '1' and SW_RIGHT = '0' then
 					if dir = 7 then dir <= 0; else dir <= dir + 1; end if;
 				elsif SW_LEFT = '0' and SW_RIGHT = '1' then
@@ -328,7 +321,7 @@ END PROCESS;
 			if (rstn = '0' or not mode = "01") then
             SW_SHOOT_last <= '0';
         elsif rising_edge(clk) then
-		     if (cnt mod 100000 = 0) then
+		     --if (cnt mod 100000 = 0) then
             -- Update the last states at each clock cycle
             SW_SHOOT_last <= SW_SHOOT;
 				if SW_SHOOT_last = '0' and SW_SHOOT = '1' THEN
@@ -339,8 +332,6 @@ END PROCESS;
 					   bullet1_want <= '0';
 				  end if;
 				  -- Check if bullet 1 is inactive
-				  -- set position of bullet to nozzle pos and make bullet active
-				 -- update bullet output 
 				  
 				  -- else if bullet 2 is active
 				  
@@ -350,7 +341,7 @@ END PROCESS;
 				end if;
 				
 				  
-			 end if;
+			 --end if;
 			end if;
 	end process;
 			

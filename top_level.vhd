@@ -22,6 +22,7 @@ ARCHITECTURE impl OF top_level IS
 	SIGNAL mode : STD_LOGIC_VECTOR(1 DOWNTO 0);
 	SIGNAL tank1_x, tank1_y : INTEGER := 80;
 	SIGNAL tank2_x, tank2_y : INTEGER := 80;
+	SIGNAL cpu1_x, cpu1_y : INTEGER;
 	SIGNAL pixel_on_tank1 : STD_LOGIC;
 	SIGNAL pixel_on_tank2 : STD_LOGIC;
 	SIGNAL pixel_on_cpu_tank1 : STD_LOGIC;
@@ -46,6 +47,14 @@ ARCHITECTURE impl OF top_level IS
   signal tank2_bullet2_y : integer := 0;
   signal tank2_bullet3_x : integer := 0;
   signal tank2_bullet3_y : integer := 0;
+  
+  signal cpu1_bullet1_x : integer := 0;
+  signal cpu1_bullet1_y : integer := 0;
+  signal cpu1_bullet2_x : integer := 0;
+  signal cpu1_bullet2_y : integer := 0;
+  signal cpu1_bullet3_x : integer := 0;
+  signal cpu1_bullet3_y : integer := 0;
+  
 
 BEGIN
 	END_game <= hit_tank;
@@ -165,6 +174,8 @@ BEGIN
 		rstn => rst,
 		xscan => hpos,
 		yscan => vpos,
+		x_pixel_ref => cpu1_x,
+		y_pixel_ref => cpu1_y,
 		player1_x_pixel_ref => tank1_x,
 		player1_y_pixel_ref => tank1_y,
 		player2_x_pixel_ref => tank2_x,
@@ -172,7 +183,13 @@ BEGIN
 		x_start => 500,
 		y_start => 200,
 		mode => mode,
-		flag => pixel_on_cpu_tank1_s
+		flag => pixel_on_cpu_tank1_s,
+		bullet1_x => cpu1_bullet1_x,
+	  bullet1_y => cpu1_bullet1_y,
+	  bullet2_x => cpu1_bullet2_x,
+	  bullet2_y => cpu1_bullet2_y,
+	  bullet3_x => cpu1_bullet3_x,
+	  bullet3_y => cpu1_bullet3_y
 	);
 	
 	-- Other Logic
@@ -195,14 +212,46 @@ BEGIN
 	
 	-- Check if bullet hits tanks
 	process(clock25) begin
-	    if (tank1_bullet1_x >= tank1_x and tank1_bullet1_x <= tank1_x + 30 and tank1_bullet1_y >= tank1_y and tank1_bullet1_y <= tank1_y + 30) OR
-       (tank1_bullet1_x >= tank2_x and tank1_bullet1_x <= tank2_x + 30 and tank1_bullet1_y >= tank2_y and tank1_bullet1_y <= tank2_y + 30) OR
-       (tank2_bullet1_x >= tank1_x and tank2_bullet1_x <= tank1_x + 30 and tank2_bullet1_y >= tank1_y and tank2_bullet1_y <= tank1_y + 30) OR
-       (tank2_bullet1_x >= tank2_x and tank2_bullet1_x <= tank2_x + 30 and tank2_bullet1_y >= tank2_y and tank2_bullet1_y <= tank2_y + 30) then
+    -- Reset hit_tank signal
+    hit_tank <= '0';
+
+    -- Check if tank1's bullet hits tank2
+    if (tank1_bullet1_x >= tank2_x and tank1_bullet1_x <= tank2_x + 30 and
+        tank1_bullet1_y >= tank2_y and tank1_bullet1_y <= tank2_y + 30) then
         hit_tank <= '1';
-    else
-        hit_tank <= '0';
     end if;
-	end process;
+
+    -- Check if tank1's bullet hits CPU1
+    if (tank1_bullet1_x >= cpu1_x and tank1_bullet1_x <= cpu1_x + 30 and
+        tank1_bullet1_y >= cpu1_y and tank1_bullet1_y <= cpu1_y + 30) then
+        hit_tank <= '1';
+    end if;
+
+    -- Check if tank2's bullet hits tank1
+    if (tank2_bullet1_x >= tank1_x and tank2_bullet1_x <= tank1_x + 30 and
+        tank2_bullet1_y >= tank1_y and tank2_bullet1_y <= tank1_y + 30) then
+        hit_tank <= '1';
+    end if;
+
+    -- Check if tank2's bullet hits CPU1
+    if (tank2_bullet1_x >= cpu1_x and tank2_bullet1_x <= cpu1_x + 30 and
+        tank2_bullet1_y >= cpu1_y and tank2_bullet1_y <= cpu1_y + 30) then
+        hit_tank <= '1';
+    end if;
+
+    -- Assuming CPU1 can also shoot, check if CPU1's bullet hits tank1
+    if (cpu1_bullet1_x >= tank1_x and cpu1_bullet1_x <= tank1_x + 30 and
+        cpu1_bullet1_y >= tank1_y and cpu1_bullet1_y <= tank1_y + 30) then
+        hit_tank <= '1';
+    end if;
+
+    -- Check if CPU1's bullet hits tank2
+    if (cpu1_bullet1_x >= tank2_x and cpu1_bullet1_x <= tank2_x + 30 and
+        cpu1_bullet1_y >= tank2_y and cpu1_bullet1_y <= tank2_y + 30) then
+        hit_tank <= '1';
+    end if;
+
+end process;
+
 
 END impl;

@@ -146,13 +146,16 @@ package declarations IS
 	END COMPONENT;
 	-- CONSTANT FOR CPU Controller
 	CONSTANT distance_threshold : INTEGER := 20;
-	
+	CONSTANT CPU_CONTROLLER_STATE_WIDTH : INTEGER := 1;
+	CONSTANT IDLE : STD_LOGIC_VECTOR(CPU_CONTROLLER_STATE_WIDTH-1 DOWNTO 0) := "0";
+	CONSTANT ROTATING : STD_LOGIC_VECTOR(CPU_CONTROLLER_STATE_WIDTH-1 DOWNTO 0) := "1";
 	
 	-- COMPONENT FOR CPU Tank
 	COMPONENT cpu_tank IS
 		PORT(
 			clk, rstn : IN STD_LOGIC;
 			xscan, yscan : IN INTEGER;
+			x_pixel_ref, y_pixel_ref : BUFFER INTEGER;
 			player1_x_pixel_ref, player1_y_pixel_ref, player2_x_pixel_ref, player2_y_pixel_ref : IN INTEGER;
 			x_start, y_start : IN INTEGER;
 			mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
