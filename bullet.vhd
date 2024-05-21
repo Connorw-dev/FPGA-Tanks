@@ -6,7 +6,7 @@ USE work.declarations.ALL;
 ENTITY bullet IS
     PORT (		  
         clk, rstn : in std_logic;
-		  mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+		  mode : IN STD_LOGIC_VECTOR(MODE_STATE_WIDTH-1 DOWNTO 0);
 		  x_pos_start, y_pos_start : in integer;
         x_pos_out, y_pos_out : out integer;
         direction : in integer range 0 to 7;
@@ -125,10 +125,10 @@ end process;
 	-- Draw bullet
 	draw : PROCESS (clk, rstn)
 	BEGIN
-		IF (rstn = '0' or not mode = "01" or active_now = '0') THEN
+		IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN or active_now = '0') THEN
 			flag <= '0';
 		ELSIF rising_edge(clk) THEN
-			if (mode = GAME_STATE) THEN
+			if (mode = ONE_CPU_GAME OR mode = TWO_CPU_GAME) THEN
 				-- draw bullet square
 				if (xscan >= x_left AND xscan <= x_right AND yscan >= y_up AND yscan <= y_down) then 
 					flag <= '1'; 
@@ -144,7 +144,7 @@ end process;
 	--Create a large looping counter to use modulo-clocks
     create_counter : PROCESS (clk, rstn)
     BEGIN
-        IF (rstn = '0' or not mode = "01") THEN
+        IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
             cnt <= 0;
         ELSIF rising_edge(clk) THEN
 		       if cnt < 1000000 then cnt <= cnt + 1; else cnt <= 0; end if;
@@ -154,7 +154,7 @@ end process;
 	-- Calculate next position
 	movement_calculation : PROCESS (clk, rstn)
     BEGIN
-        IF (rstn = '0' or not mode = "01" or active_now = '0') THEN
+        IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN or active_now = '0') THEN
 				-- Initial position
 				x_pos_next <= x_pos;
             y_pos_next <= y_pos;
@@ -202,7 +202,7 @@ end process;
 	-- Collision check before movement update.
 	 position_update : PROCESS (clk, rstn)
 		BEGIN
-			 IF (rstn = '0' or not mode = "01" or active_now = '0') THEN
+			 IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN or active_now = '0') THEN
 				  x_pos <= x_pos_start;
 				  y_pos <= y_pos_start;
 				  x_pos_temp <= x_pos;
@@ -218,10 +218,6 @@ end process;
 						 y_pos <= y_pos_temp;
 						 want_delete <= '0';
 					ELSE
-					    -- DELETE THIS
-					    --x_pos <= x_pos_start;
-						 --y_pos <= y_pos_start;
-						 
 					    want_delete <= '1';
 					END IF;
 			 END IF;

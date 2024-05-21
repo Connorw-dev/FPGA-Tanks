@@ -7,13 +7,13 @@ ENTITY text_management IS
     PORT (
         clk, rst : IN STD_LOGIC;
         hpos, vpos : IN INTEGER;
-        mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        mode : IN STD_LOGIC_VECTOR(MODE_STATE_WIDTH-1 DOWNTO 0);
         pixel_on : OUT STD_LOGIC
     );
 END text_management;
 
 ARCHITECTURE behaviOR OF text_management IS
-	SIGNAL pixel_on_tank_game, pixel_on_start, pixel_on_game_over, pixel_on_restart : STD_LOGIC;
+	SIGNAL pixel_on_tank_game, pixel_on_one_cpu, pixel_on_two_cpu, pixel_on_game_over, pixel_on_restart : STD_LOGIC;
 BEGIN
 	tank_game : Pixel_On_Text
 		GENERIC MAP(textLength => 31)
@@ -25,15 +25,25 @@ BEGIN
 			vertCoORd => vpos,
 			pixel => pixel_on_tank_game
 		);
-	press_key_to_start : Pixel_On_Text
-		GENERIC MAP(textLength => 38)
+	P1_shoot_one_cpu_game : Pixel_On_Text
+		GENERIC MAP(textLength => 56)
 		PORT MAP(
 			clk => clk,
-			dISplayText => "Press Player 1 SHOOT to start the game",
-			x => 167, y => 320,
+			dISplayText => "Press Player 1 SHOOT to start the game with one CPU tank",
+			x => 149, y => 320,
 			hORzCoORd => hpos,
 			vertCoORd => vpos,
-			pixel => pixel_on_start
+			pixel => pixel_on_one_cpu
+		);
+	P2_shoot_two_cpu_game : Pixel_On_Text
+		GENERIC MAP(textLength => 57)
+		PORT MAP(
+			clk => clk,
+			dISplayText => "Press Player 2 SHOOT to start the game with two CPU tanks",
+			x => 148, y => 420,
+			hORzCoORd => hpos,
+			vertCoORd => vpos,
+			pixel => pixel_on_two_cpu
 		);
 	game_over : Pixel_On_Text
 		GENERIC MAP(textLength => 9)
@@ -57,8 +67,8 @@ BEGIN
 		);
 
 	enable_text : PROCESS(mode) BEGIN
-		IF mode="00" then pixel_on <= pixel_on_tank_game OR pixel_on_start;
-		ELSIF mode="10" then pixel_on <= pixel_on_game_over OR pixel_on_restart;
+		IF mode=MAIN_MENU then pixel_on <= pixel_on_tank_game OR pixel_on_one_cpu OR pixel_on_two_cpu;
+		ELSIF mode=GAME_OVER_SCREEN then pixel_on <= pixel_on_game_over OR pixel_on_restart;
 		END IF;
 	END PROCESS;
 END behaviOR;

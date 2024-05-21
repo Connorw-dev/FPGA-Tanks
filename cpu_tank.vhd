@@ -10,7 +10,7 @@ ENTITY cpu_tank IS
 		x_pixel_ref, y_pixel_ref : BUFFER INTEGER;
 		player1_x_pixel_ref, player1_y_pixel_ref, player2_x_pixel_ref, player2_y_pixel_ref : IN INTEGER;
 		x_start, y_start : IN INTEGER;
-		mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+		mode : IN STD_LOGIC_VECTOR(MODE_STATE_WIDTH-1 DOWNTO 0);
       flag : OUT STD_LOGIC;
 	  bullet1_x, bullet1_y : OUT INTEGER;
 	  bullet2_x, bullet2_y : OUT INTEGER;

@@ -10,7 +10,7 @@ ENTITY tank IS
         x_pixel_ref, y_pixel_ref : BUFFER INTEGER;
         x_start, y_start : IN INTEGER;
         SW_LEFT, SW_RIGHT, SW_FORWARD, SW_SHOOT : IN STD_LOGIC;
-        mode : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        mode : IN STD_LOGIC_VECTOR(MODE_STATE_WIDTH-1 DOWNTO 0);
 			
         flag : OUT STD_LOGIC;
 		  dir_out : OUT INTEGER;
@@ -124,11 +124,11 @@ end process;
 draw_tank : PROCESS (clk, rstn)
 BEGIN
 	 --flag <= '0';
-    IF (rstn = '0' or not mode = "01") THEN
+    IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
         flag <= '0';
     ELSIF rising_edge(clk) THEN
 
-				if (mode = GAME_STATE) THEN
+				if (mode = ONE_CPU_GAME OR mode = TWO_CPU_GAME) THEN
 				      -- draw tank square
 						if (xscan >= x_left AND xscan <= x_right AND yscan >= y_up AND yscan <= y_down) then 
 							flag <= '1'; 
@@ -171,7 +171,7 @@ END PROCESS;
     --Create a large looping counter to use modulo-clocks
     create_counter : PROCESS (clk, rstn)
     BEGIN
-        IF (rstn = '0' or not mode = "01") THEN
+        IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
             cnt <= 1;
         ELSIF rising_edge(clk) THEN
 		       if cnt < 6250000 then cnt <= cnt + 1; else cnt <= 1; end if;
@@ -222,7 +222,7 @@ END PROCESS;
 
     tank_movement_calculation : PROCESS (clk, rstn)
     BEGIN
-        IF (rstn = '0' or not mode = "01") THEN
+        IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
 				-- Initial position
 				x_pixel_ref_next <= x_start;
             y_pixel_ref_next <= y_start;
@@ -272,7 +272,7 @@ END PROCESS;
 	 
 	 turn_control : process (clk, rstn)
     begin
-        if (rstn = '0' or not mode = "01") then
+        if (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) then
             -- Reset the direction and last states
             dir <= 0;
             SW_LEFT_last <= '0';
@@ -296,7 +296,7 @@ END PROCESS;
 	 -- Collision check before movement update.
 	 tank_position_update : PROCESS (clk, rstn)
 		BEGIN
-			 IF (rstn = '0' or not mode = "01") THEN
+			 IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
 				  x_pixel_ref <= x_start;
 				  y_pixel_ref <= y_start;
 				  x_pixel_ref_temp <= x_start;
@@ -318,7 +318,7 @@ END PROCESS;
 		-- SHOOT
 		SHOOT : PROCESS (clk, rstn)
 		begin
-			if (rstn = '0' or not mode = "01") then
+			if (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) then
             SW_SHOOT_last <= '0';
         elsif rising_edge(clk) then
 		     --if (cnt mod 100000 = 0) then
