@@ -21,8 +21,8 @@ BEGIN
 	PROCESS (clk, rstn, cur_state, SW, END_game) BEGIN
 		CASE cur_state IS
 			WHEN MAIN_MENU => mode <= MAIN_MENU;
-				IF GPIO_1(11)='0' THEN nxt_state1 <= ONE_CPU_GAME;
-				ELSIF GPIO_1(1)='0' THEN nxt_state1 <= TWO_CPU_GAME;
+				IF GPIO_1(15)='0' THEN nxt_state1 <= ONE_CPU_GAME;
+				ELSIF GPIO_1(5)='0' THEN nxt_state1 <= TWO_CPU_GAME;
 				ELSE nxt_state1 <= MAIN_MENU;
 				END IF;
 			WHEN ONE_CPU_GAME => mode <= ONE_CPU_GAME;
@@ -34,7 +34,7 @@ BEGIN
 				ELSE nxt_state1 <= TWO_CPU_GAME;
 				END IF;
 			WHEN GAME_OVER_SCREEN => mode <= GAME_OVER_SCREEN;
-				IF GPIO_1(1)='0' THEN nxt_state1 <= MAIN_MENU;
+				IF SW(0)='1' THEN nxt_state1 <= MAIN_MENU;
 				ELSE nxt_state1 <= GAME_OVER_SCREEN;
 				END IF;
 			WHEN OTHERS => mode <= MAIN_MENU;

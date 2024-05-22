@@ -62,7 +62,7 @@ ARCHITECTURE behavior OF tank IS
 		signal bullet_dir : integer := 0;
 
 BEGIN
-    -- Values necessary to draw the racket
+    -- Values necessary to draw the tank
     x_left <= x_pixel_ref;
     x_right <= x_pixel_ref + x_dim;
     y_up <= y_pixel_ref;

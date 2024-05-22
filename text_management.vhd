@@ -26,21 +26,21 @@ BEGIN
 			pixel => pixel_on_tank_game
 		);
 	P1_shoot_one_cpu_game : Pixel_On_Text
-		GENERIC MAP(textLength => 56)
+		GENERIC MAP(textLength => 58)
 		PORT MAP(
 			clk => clk,
-			dISplayText => "Press Player 1 SHOOT to start the game with one CPU tank",
-			x => 149, y => 320,
+			dISplayText => "Press Player 1 FORWARD to start the game with one CPU tank",
+			x => 95, y => 320,
 			hORzCoORd => hpos,
 			vertCoORd => vpos,
 			pixel => pixel_on_one_cpu
 		);
 	P2_shoot_two_cpu_game : Pixel_On_Text
-		GENERIC MAP(textLength => 57)
+		GENERIC MAP(textLength => 59)
 		PORT MAP(
 			clk => clk,
-			dISplayText => "Press Player 2 SHOOT to start the game with two CPU tanks",
-			x => 148, y => 420,
+			dISplayText => "Press Player 2 FORWARD to start the game with two CPU tanks",
+			x => 90, y => 420,
 			hORzCoORd => hpos,
 			vertCoORd => vpos,
 			pixel => pixel_on_two_cpu
@@ -56,11 +56,11 @@ BEGIN
 			pixel => pixel_on_game_over
 		);
 	restart : Pixel_On_Text
-		GENERIC MAP(textLength => 31)
+		GENERIC MAP(textLength => 14)
 		PORT MAP(
 			clk => clk,
-			dISplayText => "Press Player 2 SHOOT to restart",
-			x => 195, y => 320,
+			dISplayText => "SW0 to restart",
+			x => 250, y => 320,
 			hORzCoORd => hpos,
 			vertCoORd => vpos,
 			pixel => pixel_on_restart

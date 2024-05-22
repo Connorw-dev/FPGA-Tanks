@@ -69,6 +69,11 @@ ARCHITECTURE impl OF top_level IS
   SIGNAL cpu2_tank_x_start : INTEGER;
   SIGNAL cpu2_tank_y_start : INTEGER;
   
+  SIGNAL tank1_x_start : INTEGER;
+  SIGNAL tank1_y_start : INTEGER;
+  SIGNAL tank2_x_start : INTEGER;
+  SIGNAL tank2_y_start : INTEGER;
+  
 BEGIN
 	END_game <= hit_tank;
 	LEDR <= SW;  -- debug
@@ -141,8 +146,8 @@ BEGIN
 		  yscan => vpos,
 		  x_pixel_ref => tank1_x,
 		  y_pixel_ref => tank1_y,
-		  x_start => 80,
-		  y_start => 80,
+		  x_start => tank1_x_start,
+		  y_start => tank1_y_start,
 		  SW_LEFT => not GPIO_1(13),
 		  SW_RIGHT => not GPIO_1(17),
 		  SW_FORWARD => not GPIO_1(15),
@@ -165,8 +170,8 @@ BEGIN
 		  yscan => vpos,
 		  x_pixel_ref => tank2_x,
 		  y_pixel_ref => tank2_y,
-		  x_start => 80,
-		  y_start => 400,
+		  x_start => tank2_x_start,
+		  y_start => tank2_y_start,
 		  SW_LEFT => not GPIO_1(3),
 		  SW_RIGHT => not GPIO_1(7),
 		  SW_FORWARD => not GPIO_1(5),
@@ -233,10 +238,14 @@ BEGIN
 	-- Other Logic
 	PROCESS(mode) BEGIN
 		IF (mode = ONE_CPU_GAME) THEN
+			tank1_x_start <= 80;
+			tank1_y_start <= 80;
+			tank2_x_start <= 80;
+			tank2_y_start <= 400;
 			cpu1_tank_x_start <= 500;
 			cpu1_tank_y_start <= 200;
-			cpu2_tank_x_start <= -100;
-			cpu2_tank_y_start <= -100;
+			cpu2_tank_x_start <= -100000;
+			cpu2_tank_y_start <= -100000;
 			pixel_on_game <= pixel_on_game_s;
 			pixel_on_tank1 <= pixel_on_tank1_s;
 			pixel_on_tank2 <= pixel_on_tank2_s;
@@ -244,6 +253,10 @@ BEGIN
 			pixel_on_cpu_tank2 <= '0';
 			pixel_on_bullet <= pixel_on_bullet_s;
 		ELSIF (mode = TWO_CPU_GAME) THEN
+			tank1_x_start <= 80;
+			tank1_y_start <= 80;
+			tank2_x_start <= 80;
+			tank2_y_start <= 400;
 			cpu1_tank_x_start <= 500;
 			cpu1_tank_y_start <= 80;
 			cpu2_tank_x_start <= 500;
@@ -255,6 +268,14 @@ BEGIN
 			pixel_on_cpu_tank2 <= pixel_on_cpu_tank2_s;
 			pixel_on_bullet <= pixel_on_bullet_s;
 		ELSE 
+			tank1_x_start <= -100000;
+			tank1_y_start <= -100000;
+			tank2_x_start <= -100000;
+			tank2_y_start <= -100000;
+			cpu1_tank_x_start <= -100000;
+			cpu1_tank_y_start <= -100000;
+			cpu2_tank_x_start <= -100000;
+			cpu2_tank_y_start <= -100000;
 			pixel_on_game <= '0';
 			pixel_on_tank1 <= '0';
 			pixel_on_tank2 <= '0';
