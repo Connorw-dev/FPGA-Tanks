@@ -21,7 +21,6 @@ ARCHITECTURE behavior OF bullet IS
 	--------------- Define variables -----------------
 	
 	CONSTANT bullet_size : INTEGER := 10; -- Diameter of square bullet
-	CONSTANT x_off, y_off : INTEGER := 200; -- position when bullet is inactive
 	
 	-- Variable for modulo clocks
 	SIGNAL cnt : INTEGER := 0;
@@ -50,6 +49,11 @@ ARCHITECTURE behavior OF bullet IS
 	
 	signal active_now : std_logic := '0';
 	signal want_delete : std_logic := '0';
+	
+	-- Clock dividers for different speeds
+	SIGNAL slow_clk_div, fast_clk_div : INTEGER range 0 to 140000 := 0; -- Combined range for efficiency
+
+	
 	BEGIN
 	
 	
@@ -107,6 +111,29 @@ ARCHITECTURE behavior OF bullet IS
 	
 	------------------ Processes -----------------------
 	
+
+    -- Process for generating slower clocks
+    clock_dividers : PROCESS (clk, rstn)
+    BEGIN
+        IF rstn = '0' THEN
+            fast_clk_div <= 0;
+				slow_clk_div <= 0;
+        ELSIF rising_edge(clk) THEN
+		  
+            IF fast_clk_div < 100000 THEN
+                fast_clk_div <= fast_clk_div + 1;
+            ELSE
+                fast_clk_div <= 0;
+            END IF;
+				
+				IF slow_clk_div < 140000 THEN
+                slow_clk_div <= slow_clk_div + 1;
+            ELSE
+                slow_clk_div <= 0;
+            END IF;
+        END IF;
+    END PROCESS;
+	
 	become_active : process (clk, rstn)
 begin
     if rstn = '0' then
@@ -141,15 +168,6 @@ end process;
 		 END IF;
 	END PROCESS;
 	
-	--Create a large looping counter to use modulo-clocks
-    create_counter : PROCESS (clk, rstn)
-    BEGIN
-        IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
-            cnt <= 0;
-        ELSIF rising_edge(clk) THEN
-		       if cnt < 1000000 then cnt <= cnt + 1; else cnt <= 0; end if;
-        END IF;
-    END PROCESS;
 	
 	-- Calculate next position
 	movement_calculation : PROCESS (clk, rstn)
@@ -182,14 +200,14 @@ end process;
 				
 				-- Movement
 				-- Fast movement for vertical/horizontal
-					IF (cnt mod 100000 = 0) THEN
+					IF (fast_clk_div = 0) THEN
 					  IF (direction = 0 or direction = 2 or direction = 4 or direction = 6) THEN
 					  
 								y_pos_next <= y_pos + y_movement;
 								x_pos_next <= x_pos + x_movement;
 						END IF;
 					-- Slow movement for diagonals
-					ELSIF (cnt mod 140000 = 0) THEN
+					ELSIF (slow_clk_div = 0) THEN
 						IF (direction = 1 or direction = 3 or direction = 5 or direction = 7) THEN
 								y_pos_next <= y_pos + y_movement;
 								x_pos_next <= x_pos + x_movement;

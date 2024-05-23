@@ -60,6 +60,12 @@ ARCHITECTURE behavior OF tank IS
 		signal bullet1_want : std_logic := '0';
 		signal bullet_start_x, bullet_start_y : integer := 0;
 		signal bullet_dir : integer := 0;
+		
+		-- Clock dividers for different speeds
+    SIGNAL slow_clk_div : INTEGER := 0;
+    SIGNAL fast_clk_div : INTEGER := 0;
+	 SIGNAL shoot_clk_div : INTEGER := 0;
+
 
 BEGIN
     -- Values necessary to draw the tank
@@ -84,6 +90,49 @@ BEGIN
 	bottom_left_y <= y_pixel_ref_next + y_dim;
 	bottom_right_x <= x_pixel_ref_next + x_dim;
 	bottom_right_y <= y_pixel_ref_next + y_dim;
+	
+	-- Process for generating slower clocks for diagonal movement
+    slow_clock : PROCESS (clk, rstn)
+    BEGIN
+        IF rstn = '0' THEN
+            slow_clk_div <= 0;
+        ELSIF rising_edge(clk) THEN
+            IF slow_clk_div < 140000 THEN
+                slow_clk_div <= slow_clk_div + 1;
+            ELSE
+                slow_clk_div <= 0;
+            END IF;
+        END IF;
+    END PROCESS;
+
+    -- Process for generating faster clocks for horizontal/vertical movement
+    fast_clock : PROCESS (clk, rstn)
+    BEGIN
+        IF rstn = '0' THEN
+            fast_clk_div <= 0;
+        ELSIF rising_edge(clk) THEN
+            IF fast_clk_div < 100000 THEN
+                fast_clk_div <= fast_clk_div + 1;
+            ELSE
+                fast_clk_div <= 0;
+            END IF;
+        END IF;
+    END PROCESS;
+	 
+	 -- Process for generating faster clocks for horizontal/vertical movement
+    shoot_clock : PROCESS (clk, rstn)
+    BEGIN
+        IF rstn = '0' THEN
+            shoot_clk_div <= 0;
+        ELSIF rising_edge(clk) THEN
+            IF shoot_clk_div < 6250000 THEN
+                shoot_clk_div <= shoot_clk_div + 1;
+            ELSE
+                shoot_clk_div <= 0;
+            END IF;
+        END IF;
+    END PROCESS;
+	
 	
 	process (dir)
 	begin
@@ -168,21 +217,12 @@ BEGIN
     END IF;
 END PROCESS;
 
-    --Create a large looping counter to use modulo-clocks
-    create_counter : PROCESS (clk, rstn)
-    BEGIN
-        IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
-            cnt <= 1;
-        ELSIF rising_edge(clk) THEN
-		       if cnt < 6250000 then cnt <= cnt + 1; else cnt <= 1; end if;
-        END IF;
-    END PROCESS;
 	 
 		-- Port map four fields that check collision for each corner of tank
 		 game_field_top_left : field port map(
-		 clk => clk, rstn => rstn,
-		 xscan => top_left_x, yscan => top_left_y,
-		 flag => is_top_left_wall
+			 clk => clk, rstn => rstn,
+			 xscan => top_left_x, yscan => top_left_y,
+			 flag => is_top_left_wall
 		);
 
 		game_field_top_right : field port map(
@@ -202,6 +242,7 @@ END PROCESS;
 			 xscan => bottom_right_x, yscan => bottom_right_y,
 			 flag => is_bottom_right_wall
 		);
+		
 		
 		-- BULLET ADD
 		bullet1 : bullet port map(	  
@@ -224,6 +265,12 @@ END PROCESS;
     BEGIN
         IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
 				-- Initial position
+				x_pixel_ref <= x_start;
+			   y_pixel_ref <= y_start;
+				
+			   x_pixel_ref_temp <= x_start;
+			   y_pixel_ref_temp <= y_start;
+				
 				x_pixel_ref_next <= x_start;
             y_pixel_ref_next <= y_start;
         ELSIF rising_edge(clk) THEN
@@ -250,7 +297,7 @@ END PROCESS;
 				
 				-- Movement
 				-- Fast movement for vertical/horizontal
-				IF (cnt mod 100000 = 0) THEN
+				IF (fast_clk_div = 0) THEN
 				  IF (dir = 0 or dir = 2 or dir = 4 or dir = 6) THEN
 					   IF (SW_FORWARD = '1') THEN -- Need to add wall check
 							y_pixel_ref_next <= y_pixel_ref + y_movement;
@@ -258,7 +305,7 @@ END PROCESS;
 						END IF;
 					END IF;
 				-- Slow movement for diagonals
-				ELSIF (cnt mod 140000 = 0) THEN
+				ELSIF (slow_clk_div = 0) THEN
 					IF (dir = 1 or dir = 3 or dir = 5 or dir = 7) THEN
 					   IF (SW_FORWARD = '1') THEN -- Need to add wall check
 							y_pixel_ref_next <= y_pixel_ref + y_movement;
@@ -266,9 +313,20 @@ END PROCESS;
 						END IF;
 					END IF;
 				end if;
+				
+				x_pixel_ref_temp <= x_pixel_ref_next;
+				y_pixel_ref_temp <= y_pixel_ref_next;
+				
+				IF ((is_top_left_wall = '0') AND (is_top_right_wall = '0') AND (is_bottom_left_wall = '0') AND (is_bottom_right_wall = '0')) THEN
+					 x_pixel_ref <= x_pixel_ref_temp;
+					 y_pixel_ref <= y_pixel_ref_temp;
+				END IF;
+				
 								
 			END IF;
     END PROCESS;
+	 
+
 	 
 	 turn_control : process (clk, rstn)
     begin
@@ -278,7 +336,7 @@ END PROCESS;
             SW_LEFT_last <= '0';
             SW_RIGHT_last <= '0';
         elsif rising_edge(clk) then
-		     if (cnt mod 6250000 = 0) then
+		     if (shoot_clk_div = 0) then
             -- Update the last states at each clock cycle
             SW_LEFT_last <= SW_LEFT;
             SW_RIGHT_last <= SW_RIGHT;
@@ -293,27 +351,7 @@ END PROCESS;
 			end if;
 	end process;
 	 
-	 -- Collision check before movement update.
-	 tank_position_update : PROCESS (clk, rstn)
-		BEGIN
-			 IF (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) THEN
-				  x_pixel_ref <= x_start;
-				  y_pixel_ref <= y_start;
-				  x_pixel_ref_temp <= x_start;
-				  y_pixel_ref_temp <= y_start;
-			 ELSIF rising_edge(clk) THEN
-				  -- Update temp vars first
-				  x_pixel_ref_temp <= x_pixel_ref_next;
-				  y_pixel_ref_temp <= y_pixel_ref_next;
-
-				  -- Check collision using temp vars
-				  IF (is_top_left_wall = '0') AND (is_top_right_wall = '0') AND (is_bottom_left_wall = '0') AND (is_bottom_right_wall = '0') THEN
-						 x_pixel_ref <= x_pixel_ref_temp;
-						 y_pixel_ref <= y_pixel_ref_temp;
-					END IF;
-			 END IF;
-		END PROCESS;
-		
+	 
 		
 		-- SHOOT
 		SHOOT : PROCESS (clk, rstn)
@@ -321,7 +359,7 @@ END PROCESS;
 			if (rstn = '0' or mode = MAIN_MENU or mode = GAME_OVER_SCREEN) then
             SW_SHOOT_last <= '0';
         elsif rising_edge(clk) then
-		     --if (cnt mod 100000 = 0) then
+
             -- Update the last states at each clock cycle
             SW_SHOOT_last <= SW_SHOOT;
 				if SW_SHOOT_last = '0' and SW_SHOOT = '1' THEN
@@ -331,17 +369,11 @@ END PROCESS;
 				   else
 					   bullet1_want <= '0';
 				  end if;
-				  -- Check if bullet 1 is inactive
-				  
-				  -- else if bullet 2 is active
-				  
-				  -- else if bullet 3 is active
-				  else
+			   else
 				    bullet1_want <= '0';
 				end if;
 				
 				  
-			 --end if;
 			end if;
 	end process;
 			

@@ -34,9 +34,7 @@ BEGIN
 				ELSE nxt_state1 <= TWO_CPU_GAME;
 				END IF;
 			WHEN GAME_OVER_SCREEN => mode <= GAME_OVER_SCREEN;
-				IF SW(0)='1' THEN nxt_state1 <= MAIN_MENU;
-				ELSE nxt_state1 <= GAME_OVER_SCREEN;
-				END IF;
+				nxt_state1 <= GAME_OVER_SCREEN;
 			WHEN OTHERS => mode <= MAIN_MENU;
 		END CASE;
 	END PROCESS;

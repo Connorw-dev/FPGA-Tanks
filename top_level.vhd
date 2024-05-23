@@ -19,7 +19,7 @@ END top_level;
 ARCHITECTURE impl OF top_level IS
 	SIGNAL hpos, vpos : INTEGER;
 	SIGNAL hsync, vsync, clock25, ff1_OUT, ff2_OUT, pixel_on_game, pixel_on_text, END_game : STD_LOGIC;
-	SIGNAL mode : STD_LOGIC_VECTOR(1 DOWNTO 0);
+	SIGNAL mode, mode_temp : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
 	SIGNAL tank1_x, tank1_y : INTEGER;
 	SIGNAL tank2_x, tank2_y : INTEGER;
 	SIGNAL cpu1_x, cpu1_y : INTEGER;
@@ -130,7 +130,7 @@ BEGIN
 		clk => clock25, rstn => rst,
 		END_game => END_game, SW => SW,
 		GPIO_1 => GPIO_1,
-		mode => mode
+		mode => mode_temp
 	);
 	
 	game_field : field PORT MAP(
@@ -236,52 +236,56 @@ BEGIN
 	);
 	
 	-- Other Logic
-	PROCESS(mode) BEGIN
-		IF (mode = ONE_CPU_GAME) THEN
-			tank1_x_start <= 80;
-			tank1_y_start <= 80;
-			tank2_x_start <= 80;
-			tank2_y_start <= 400;
-			cpu1_tank_x_start <= 500;
-			cpu1_tank_y_start <= 200;
-			cpu2_tank_x_start <= -100000;
-			cpu2_tank_y_start <= -100000;
-			pixel_on_game <= pixel_on_game_s;
-			pixel_on_tank1 <= pixel_on_tank1_s;
-			pixel_on_tank2 <= pixel_on_tank2_s;
-			pixel_on_cpu_tank1 <= pixel_on_cpu_tank1_s;
-			pixel_on_cpu_tank2 <= '0';
-			pixel_on_bullet <= pixel_on_bullet_s;
-		ELSIF (mode = TWO_CPU_GAME) THEN
-			tank1_x_start <= 80;
-			tank1_y_start <= 80;
-			tank2_x_start <= 80;
-			tank2_y_start <= 400;
-			cpu1_tank_x_start <= 500;
-			cpu1_tank_y_start <= 80;
-			cpu2_tank_x_start <= 500;
-			cpu2_tank_y_start <= 400;
-			pixel_on_game <= pixel_on_game_s;
-			pixel_on_tank1 <= pixel_on_tank1_s;
-			pixel_on_tank2 <= pixel_on_tank2_s;
-			pixel_on_cpu_tank1 <= pixel_on_cpu_tank1_s;
-			pixel_on_cpu_tank2 <= pixel_on_cpu_tank2_s;
-			pixel_on_bullet <= pixel_on_bullet_s;
-		ELSE 
-			tank1_x_start <= -100000;
-			tank1_y_start <= -100000;
-			tank2_x_start <= -100000;
-			tank2_y_start <= -100000;
-			cpu1_tank_x_start <= -100000;
-			cpu1_tank_y_start <= -100000;
-			cpu2_tank_x_start <= -100000;
-			cpu2_tank_y_start <= -100000;
-			pixel_on_game <= '0';
-			pixel_on_tank1 <= '0';
-			pixel_on_tank2 <= '0';
-			pixel_on_cpu_tank1 <= '0';
-			pixel_on_cpu_tank2 <= '0';
-			pixel_on_bullet <= '0';
+	PROCESS(clock25, mode) BEGIN
+	   IF rising_edge(clock25) THEN
+		   mode <= mode_temp;
+			IF (mode_temp = ONE_CPU_GAME) THEN
+				tank1_x_start <= 80;
+				tank1_y_start <= 80;
+				tank2_x_start <= 80;
+				tank2_y_start <= 400;
+				
+				cpu1_tank_x_start <= 500;
+				cpu1_tank_y_start <= 200;
+				cpu2_tank_x_start <= -1000;
+				cpu2_tank_y_start <= -1000;
+				pixel_on_game <= pixel_on_game_s;
+				pixel_on_tank1 <= pixel_on_tank1_s;
+				pixel_on_tank2 <= pixel_on_tank2_s;
+				pixel_on_cpu_tank1 <= pixel_on_cpu_tank1_s;
+				pixel_on_cpu_tank2 <= '0';
+				pixel_on_bullet <= pixel_on_bullet_s;
+			ELSIF (mode_temp = TWO_CPU_GAME) THEN
+				tank1_x_start <= 80;
+				tank1_y_start <= 80;
+				tank2_x_start <= 80;
+				tank2_y_start <= 400;
+				cpu1_tank_x_start <= 500;
+				cpu1_tank_y_start <= 80;
+				cpu2_tank_x_start <= 500;
+				cpu2_tank_y_start <= 400;
+				pixel_on_game <= pixel_on_game_s;
+				pixel_on_tank1 <= pixel_on_tank1_s;
+				pixel_on_tank2 <= pixel_on_tank2_s;
+				pixel_on_cpu_tank1 <= pixel_on_cpu_tank1_s;
+				pixel_on_cpu_tank2 <= pixel_on_cpu_tank2_s;
+				pixel_on_bullet <= pixel_on_bullet_s;
+			ELSE 
+				tank1_x_start <= -10000;
+				tank1_y_start <= -10000;
+				tank2_x_start <= 10000;
+				tank2_y_start <= 10000;
+				cpu1_tank_x_start <= -100000;
+				cpu1_tank_y_start <= -100000;
+				cpu2_tank_x_start <= 100000;
+				cpu2_tank_y_start <= 100000;
+				pixel_on_game <= '0';
+				pixel_on_tank1 <= '0';
+				pixel_on_tank2 <= '0';
+				pixel_on_cpu_tank1 <= '0';
+				pixel_on_cpu_tank2 <= '0';
+				pixel_on_bullet <= '0';
+			END IF;
 		END IF;
 	END PROCESS;
 

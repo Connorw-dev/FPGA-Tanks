@@ -50,17 +50,17 @@ BEGIN
 		PORT MAP(
 			clk => clk,
 			dISplayText => "GAME OVER",
-			x => 275, y => 160,
+			x => 280, y => 160,
 			hORzCoORd => hpos,
 			vertCoORd => vpos,
 			pixel => pixel_on_game_over
 		);
 	restart : Pixel_On_Text
-		GENERIC MAP(textLength => 14)
+		GENERIC MAP(textLength => 15)
 		PORT MAP(
 			clk => clk,
-			dISplayText => "SW0 to restart",
-			x => 250, y => 320,
+			dISplayText => "KEY3 to restart",
+			x => 260, y => 320,
 			hORzCoORd => hpos,
 			vertCoORd => vpos,
 			pixel => pixel_on_restart
