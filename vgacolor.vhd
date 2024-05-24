@@ -7,7 +7,7 @@ USE wORk.declarations.ALL;
 ENTITY vgacolOR IS
 	PORT (
 		clk, rst : IN STD_LOGIC;
-		pixel_on, pixel_on_menu : IN STD_LOGIC;
+		pixel_on_field, pixel_on_text : IN STD_LOGIC;
 		pixel_on_tank1, pixel_on_tank2 : IN STD_LOGIC; 
 		pixel_on_cpu_tank1 : IN STD_LOGIC;
 		pixel_on_cpu_tank2 : IN STD_LOGIC;
@@ -44,7 +44,7 @@ BEGIN
 				red <= (OTHERS => '0');
 				green <= (OTHERS => '1');
 				blue <= (OTHERS => '1');
-			ELSIF (pixel_on = '1' OR pixel_on_menu = '1') THEN
+			ELSIF (pixel_on_field = '1' OR pixel_on_text = '1') THEN
 				red <= (OTHERS => '1');
 				green <= (OTHERS => '1');
 				blue <= (OTHERS => '1');

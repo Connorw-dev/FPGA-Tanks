@@ -8,7 +8,7 @@ ENTITY text_management IS
         clk, rst : IN STD_LOGIC;
         hpos, vpos : IN INTEGER;
         mode : IN STD_LOGIC_VECTOR(MODE_STATE_WIDTH-1 DOWNTO 0);
-        pixel_on : OUT STD_LOGIC
+        pixel_on_text : OUT STD_LOGIC
     );
 END text_management;
 
@@ -67,8 +67,8 @@ BEGIN
 		);
 
 	enable_text : PROCESS(mode) BEGIN
-		IF mode=MAIN_MENU then pixel_on <= pixel_on_tank_game OR pixel_on_one_cpu OR pixel_on_two_cpu;
-		ELSIF mode=GAME_OVER_SCREEN then pixel_on <= pixel_on_game_over OR pixel_on_restart;
+		IF mode=MAIN_MENU then pixel_on_text <= pixel_on_tank_game OR pixel_on_one_cpu OR pixel_on_two_cpu;
+		ELSIF mode=GAME_OVER_SCREEN then pixel_on_text <= pixel_on_game_over OR pixel_on_restart;
 		END IF;
 	END PROCESS;
 END behaviOR;
