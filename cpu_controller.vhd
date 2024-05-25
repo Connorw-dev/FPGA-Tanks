@@ -19,7 +19,7 @@ ARCHITECTURE impl OF cpu_controller IS
     SIGNAL closest_tank : STD_LOGIC;
     SIGNAL dist1, dist2 : INTEGER;
     SIGNAL target_dir : INTEGER;
-	 SIGNAL P1_center_x, P1_center_y, P2_center_x, P2_center_y, CPU1_center_x, CPU1_center_y : INTEGER;
+	 SIGNAL P1_center_x, P1_center_y, P2_center_x, P2_center_y, CPU_center_x, CPU_center_y : INTEGER;
 	 SIGNAL cur_state : STD_LOGIC_VECTOR(CPU_CONTROLLER_STATE_WIDTH-1 DOWNTO 0) := IDLE;
 	 SIGNAL nxt_state, nxt_state1 : STD_LOGIC_VECTOR(CPU_CONTROLLER_STATE_WIDTH-1 DOWNTO 0);
 	 SIGNAL shoot_s : STD_LOGIC := '1';
@@ -66,8 +66,8 @@ BEGIN
 	 P1_center_y <= player1_y_pixel_ref + TANK_SIZE / 2;
 	 P2_center_x <= player2_x_pixel_ref + TANK_SIZE / 2;
 	 P2_center_y <= player2_y_pixel_ref + TANK_SIZE / 2;
-	 CPU1_center_x <= x_pixel_ref + TANK_SIZE / 2;
-	 CPU1_center_y <= y_pixel_ref + TANK_SIZE / 2;
+	 CPU_center_x <= x_pixel_ref + TANK_SIZE / 2;
+	 CPU_center_y <= y_pixel_ref + TANK_SIZE / 2;
 	 
 	 -- Movement
     SW_FORWARD <= '0';
@@ -96,11 +96,11 @@ BEGIN
 				 closest_tank <= '0';
 			ELSE
 				 -- Calculate squared distances
-				 dist1 <= (P1_center_x - CPU1_center_x) * (P1_center_x - CPU1_center_x) + 
-							 (P1_center_y - CPU1_center_y) * (P1_center_y - CPU1_center_y);
+				 dist1 <= (P1_center_x - CPU_center_x) * (P1_center_x - CPU_center_x) + 
+							 (P1_center_y - CPU_center_y) * (P1_center_y - CPU_center_y);
 							 
-				 dist2 <= (P2_center_x - CPU1_center_x) * (P2_center_x - CPU1_center_x) + 
-							 (P2_center_y - CPU1_center_y) * (P2_center_y - CPU1_center_y);
+				 dist2 <= (P2_center_x - CPU_center_x) * (P2_center_x - CPU_center_x) + 
+							 (P2_center_y - CPU_center_y) * (P2_center_y - CPU_center_y);
 
 				 -- Compare distances
 				 IF dist1 <= dist2 THEN
@@ -120,9 +120,9 @@ BEGIN
 	) 
 	BEGIN
         IF closest_tank = '0' THEN
-            target_dir <= get_direction(P1_center_x, P1_center_y, CPU1_center_x, CPU1_center_y);
+            target_dir <= get_direction(P1_center_x, P1_center_y, CPU_center_x, CPU_center_y);
         ELSE
-            target_dir <= get_direction(P2_center_x, P2_center_y, CPU1_center_x, CPU1_center_y);
+            target_dir <= get_direction(P2_center_x, P2_center_y, CPU_center_x, CPU_center_y);
         END IF;
     END PROCESS;
 	
