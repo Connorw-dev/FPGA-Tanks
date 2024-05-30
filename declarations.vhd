@@ -59,7 +59,7 @@ package declarations IS
 			clk, rst : IN STD_LOGIC;
 			hpos, vpos : IN INTEGER;
 			mode : IN STD_LOGIC_VECTOR(MODE_STATE_WIDTH-1 DOWNTO 0);
-			pixel_on : OUT STD_LOGIC
+			pixel_on_text : OUT STD_LOGIC
 		);
 	END COMPONENT;
 	
@@ -95,7 +95,7 @@ package declarations IS
 	COMPONENT vgacolOR IS
 		PORT (
 			clk, rst : IN STD_LOGIC;
-			pixel_on, pixel_on_menu : IN STD_LOGIC;
+			pixel_on_field, pixel_on_text : IN STD_LOGIC;
 			pixel_on_tank1, pixel_on_tank2 : IN STD_LOGIC;
 			pixel_on_cpu_tank1 : IN STD_LOGIC;
 			pixel_on_cpu_tank2 : IN STD_LOGIC;

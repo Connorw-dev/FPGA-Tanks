@@ -18,7 +18,7 @@ END top_level;
 
 ARCHITECTURE impl OF top_level IS
 	SIGNAL hpos, vpos : INTEGER;
-	SIGNAL hsync, vsync, clock25, ff1_OUT, ff2_OUT, pixel_on_game, pixel_on_text, END_game : STD_LOGIC;
+	SIGNAL hsync, vsync, clock25, ff1_OUT, ff2_OUT, pixel_on_field, pixel_on_text, END_game : STD_LOGIC;
 	SIGNAL mode, mode_temp : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
 	SIGNAL tank1_x, tank1_y : INTEGER;
 	SIGNAL tank2_x, tank2_y : INTEGER;
@@ -30,7 +30,7 @@ ARCHITECTURE impl OF top_level IS
 	SIGNAL pixel_on_cpu_tank2 : STD_LOGIC;
 	SIGNAL pixel_on_bullet : STD_LOGIC;
 	-- Following signals are for the mode logic
-	SIGNAL pixel_on_game_s : STD_LOGIC;
+	SIGNAL pixel_on_field_s : STD_LOGIC;
 	SIGNAL pixel_on_tank1_s, pixel_on_tank2_s, pixel_on_cpu_tank1_s, pixel_on_cpu_tank2_s, pixel_on_bullet_s : STD_LOGIC;
 	-- Tank stuff
 	SIGNAL tank1_dir, tank2_dir : INTEGER := 0;
@@ -109,8 +109,8 @@ BEGIN
 	
 	dISplay_colORs : vgacolOR PORT MAP(
 		clk => clock25, rst => rst,
-		pixel_on => pixel_on_game,
-		pixel_on_menu => pixel_on_text,
+		pixel_on_field => pixel_on_field,
+		pixel_on_text => pixel_on_text,
 		pixel_on_tank1 => pixel_on_tank1,
 		pixel_on_tank2 => pixel_on_tank2,
 		pixel_on_cpu_tank1 => pixel_on_cpu_tank1,
@@ -123,7 +123,7 @@ BEGIN
 		clk => clock25, rst => rst,
 		hpos => hpos, vpos => vpos,
 		mode => mode,
-		pixel_on => pixel_on_text
+		pixel_on_text => pixel_on_text
 	);
 	
 	modes : ModeFSM PORT MAP(
@@ -137,7 +137,7 @@ BEGIN
 		clk => clock25, rstn => rst,
 		xscan => hpos, yscan => vpos,
 		mode => mode,
-		flag => pixel_on_game_s
+		flag => pixel_on_field_s
 	);
 	
 	tank1 : tank port map(
@@ -250,7 +250,7 @@ BEGIN
 				cpu1_tank_y_start <= 200;
 				cpu2_tank_x_start <= -1000;
 				cpu2_tank_y_start <= -1000;
-				pixel_on_game <= pixel_on_game_s;
+				pixel_on_field <= pixel_on_field_s;
 				pixel_on_tank1 <= pixel_on_tank1_s;
 				pixel_on_tank2 <= pixel_on_tank2_s;
 				pixel_on_cpu_tank1 <= pixel_on_cpu_tank1_s;
@@ -265,7 +265,7 @@ BEGIN
 				cpu1_tank_y_start <= 80;
 				cpu2_tank_x_start <= 500;
 				cpu2_tank_y_start <= 400;
-				pixel_on_game <= pixel_on_game_s;
+				pixel_on_field <= pixel_on_field_s;
 				pixel_on_tank1 <= pixel_on_tank1_s;
 				pixel_on_tank2 <= pixel_on_tank2_s;
 				pixel_on_cpu_tank1 <= pixel_on_cpu_tank1_s;
@@ -280,7 +280,7 @@ BEGIN
 				cpu1_tank_y_start <= -100000;
 				cpu2_tank_x_start <= 100000;
 				cpu2_tank_y_start <= 100000;
-				pixel_on_game <= '0';
+				pixel_on_field <= '0';
 				pixel_on_tank1 <= '0';
 				pixel_on_tank2 <= '0';
 				pixel_on_cpu_tank1 <= '0';
