@@ -87,24 +87,28 @@ ARCHITECTURE behavior OF bullet IS
 	game_field_top_left : field port map(
 		 clk => clk, rstn => rstn,
 		 xscan => top_left_x, yscan => top_left_y,
+		 mode => mode,
 		 flag => is_top_left_wall
 	);
 
 	game_field_top_right : field port map(
 		 clk => clk, rstn => rstn,
 		 xscan => top_right_x, yscan => top_right_y,
+		 mode => mode,
 		 flag => is_top_right_wall
 	);
 
 	game_field_bottom_left : field port map(
 		 clk => clk, rstn => rstn,
 		 xscan => bottom_left_x, yscan => bottom_left_y,
+		 mode => mode,
 		 flag => is_bottom_left_wall
 	);
 
 	game_field_bottom_right : field port map(
 		 clk => clk, rstn => rstn,
 		 xscan => bottom_right_x, yscan => bottom_right_y,
+		 mode => mode,
 		 flag => is_bottom_right_wall
 	);
 
